@@ -46,34 +46,21 @@ REMOVE_EXTENSIONS = 1
 CODESIGN_IPA = 0
 
 YOUMOD_PATH = Tweaks/YTLite
-YOUMOD_VERSION ?= $(shell curl -s https://api.github.com/repos/dayanch96/YTLite/releases/latest | grep '"tag_name"' | sed 's/.*"v\(.*\)".*/\1/')
-ifeq ($(YTLITE_VERSION),)
-$(error Failed to fetch latest YTLite version from GitHub API)
-endif
 YOUMOD_DEB = $(YOUMOD_PATH)/dev.water888.youmod_$(YOUMOD_VERSION)_iphoneos-arm64.deb
-YOUMOD_DYLIB = $(YTLITE_PATH)/Library/MobileSubstrate/DynamicLibraries/YouMod.dylib
-YOUMOD_BUNDLE = $(YTLITE_PATH)/Library/Application\ Support/YouMod.bundle
+YOUMOD_DYLIB = $(YOUMOD_PATH)/Library/MobileSubstrate/DynamicLibraries/YouMod.dylib
+YOUMOD_BUNDLE = $(YOUMOD_PATH)/Library/Application\ Support/YouMod.bundle
 
 internal-clean::
-	@rm -rf $(YOUMOD_PATH)/*
+    @rm -rf $(YOUMOD_PATH)/*
 
 ifneq ($(JAILBROKEN),1)
 before-all::
-	@if [[ ! -f $(YTLITE_DEB) ]]; then \
-        	rm -rf $(YTLITE_PATH)/*; \
-        	$(PRINT_FORMAT_BLUE) "Downloading YouMod"; \
-	fi
-before-all::
-	@if [[ ! -f $(YTLITE_DEB) ]]; then \
-		curl -s -L "https://github.com/dayanch96/YTLite/releases/download/v$(YTLITE_VERSION)/com.dvntm.ytlite_$(YTLITE_VERSION)_iphoneos-arm64.deb" -o $(YTLITE_DEB); \
-	fi; \
-	if [[ ! -f $(YTLITE_DYLIB) || ! -d $(YTLITE_BUNDLE) ]]; then \
-		tar -xf $(YTLITE_DEB) -C $(YTLITE_PATH); tar -xf $(YTLITE_PATH)/data.tar* -C $(YTLITE_PATH); \
-		if [[ ! -f $(YTLITE_DYLIB) || ! -d $(YTLITE_BUNDLE) ]]; then \
-			$(PRINT_FORMAT_ERROR) "Failed to extract YTLite"; exit 1; \
-		fi; \
-	fi;
+    @if [[ ! -f $(YOUMOD_DYLIB) || ! -d $(YOUMOD_BUNDLE) ]]; then \
+        tar -xf $(YOUMOD_DEB) -C $(YOUMOD_PATH); \
+        tar -xf $(YOUMOD_PATH)/data.tar* -C $(YOUMOD_PATH); \
+    fi
 else
 before-package::
-	@mkdir -p $(THEOS_STAGING_DIR)/Library/Application\ Support; cp -r lang/YTLitePlus.bundle $(THEOS_STAGING_DIR)/Library/Application\ Support/
+    @mkdir -p $(THEOS_STAGING_DIR)/Library/Application\ Support; \
+    cp -r lang/YTModPlus.bundle $(THEOS_STAGING_DIR)/Library/Application\ Support/
 endif
